@@ -1,11 +1,15 @@
 #!/usr/bin/python3
 
 import sys, getopt, os
+# get configuration
+import configparser
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 from multiprocessing import Pool
 
 # import definitions and classes
 import class_ExifTool
-import config
 
 
 def main():
@@ -19,7 +23,7 @@ def main():
 			usage()
 			sys.exit()
 		elif o in ("-e", "--extract"):
-			with Pool(config.processes) as p:
+			with Pool(config['general'].getint('processes')) as p:
 				p.map(extract_embedded_jpg, args)
 
 def usage():
