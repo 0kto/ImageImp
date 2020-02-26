@@ -5,6 +5,8 @@ from multiprocessing import Pool
 
 # import definitions and classes
 import class_ExifTool
+import config
+
 
 def main():
 	try:
@@ -17,7 +19,7 @@ def main():
 			usage()
 			sys.exit()
 		elif o in ("-e", "--extract"):
-			with Pool(5) as p:
+			with Pool(config.processes) as p:
 				p.map(extract_embedded_jpg, args)
 
 def usage():
