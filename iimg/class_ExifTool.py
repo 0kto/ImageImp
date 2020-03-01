@@ -2,6 +2,7 @@ import subprocess
 import json
 import os
 
+
 # from https://stackoverflow.com/questions/10075115/call-exiftool-from-a-python-script
 class ExifTool(object):
 	sentinel = "{ready}\n"
@@ -41,3 +42,10 @@ class ExifTool(object):
 		else:
 			self.execute("-b", "-PreviewImage", "-w", ".jpg", f"{basename}.cr2")
 			print(f"extracted {basename}.jpg")
+
+	def import_raw(self, filename, output_dir):
+		basename, ext = os.path.splitext(filename)
+		self.execute(
+			"-d", f"{output_dir}/%Y/%V/%Y-%m-%d_%H-%M-%S",
+			"-FileName<${CreateDate}_${MyModel}_${FileIndex}.%le",
+			f"{filename}")
