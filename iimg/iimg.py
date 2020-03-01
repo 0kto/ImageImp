@@ -5,12 +5,10 @@ import sys, getopt, os
 import configparser
 config = configparser.ConfigParser()
 config.read('config.ini')
-
-from multiprocessing import Pool
+import threading
 
 # import definitions and classes
-import class_ExifTool
-
+from class_ExifTool import ExifTool
 
 def main():
 	try:
@@ -23,8 +21,8 @@ def main():
 			usage()
 			sys.exit()
 		elif o in ("-e", "--extract"):
-			with Pool(config['general'].getint('processes')) as p:
-				p.map(extract_embedded_jpg, args)
+			split_extract_embedded_jpg(args)
+
 
 def usage():
 	print("iimg options <filelist>")
@@ -32,18 +30,28 @@ def usage():
 	print("available options")
 	print("-e, --extract     extract embedded .jpg from .cr2")
 
-def extract_embedded_jpg(file):
-	basename, ext = os.path.splitext(file)
-	if not os.path.isfile(f"{basename}.cr2"):
-		print(f"ignoring '{basename}'")
 
-	elif os.path.isfile(f"{basename}.jpg"):
-		print(f"pre-existing '{basename}'.jpg")
+def split_extract_embedded_jpg(items, num_splits=4):
+	split_size = len(items) // num_splits
+	threads = []
+	with ExifTool() as e:
+		for i in range(num_splits):
+			start = i * split_size
+			end = None if i+1 == num_splits else (i+1) * split_size                 
+			threads.append(
+				threading.Thread(target=process, args=(e.extract_embedded_jpg, items, start, end)))
+			threads[-1].start()
+		for t in threads:
+			t.join()
+			
+def process(function, items, start, end):
+	for item in items[start:end]:
+		try:
+			function(item)
+		except Exception:
+			print('error with item')
 
-	else:
-		with ExifTool() as e:
-			metadata = e.extract_embedded_jpg(f"{basename}.cr2")
-		print(f"extracted {basename}.jpg")
 
+			
 if __name__ == "__main__":
 	main()

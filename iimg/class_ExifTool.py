@@ -1,5 +1,6 @@
 import subprocess
 import json
+import os
 
 # from https://stackoverflow.com/questions/10075115/call-exiftool-from-a-python-script
 class ExifTool(object):
@@ -30,4 +31,13 @@ class ExifTool(object):
 		return output[:-len(self.sentinel)]
 
 	def extract_embedded_jpg(self, filename):
-		self.execute("-b", "-PreviewImage", "-w", ".jpg", filename)
+		basename, ext = os.path.splitext(filename)
+		if not os.path.isfile(f"{basename}.cr2"):
+			print(f"ignoring '{basename}'")
+
+		elif os.path.isfile(f"{basename}.jpg"):
+			print(f"pre-existing '{basename}'.jpg")
+
+		else:
+			self.execute("-b", "-PreviewImage", "-w", ".jpg", f"{basename}.cr2")
+			print(f"extracted {basename}.jpg")
