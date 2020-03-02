@@ -5,12 +5,15 @@ import os
 
 # from https://stackoverflow.com/questions/10075115/call-exiftool-from-a-python-script
 class ExifTool(object):
+"""Class that initializes an ExifTool object and passes jobs to it."""
 	sentinel = "{ready}\n"
 
 	def __init__(self, executable="exiftool"):
+	"""Initialize ExifTool"""
 		self.executable = executable
 
 	def __enter__(self):
+	"""open object and make ExifTools stay open"""
 		self.process = subprocess.Popen(
 			[self.executable, "-stay_open", "True",  "-@", "-"],
 			universal_newlines=True,
@@ -18,10 +21,12 @@ class ExifTool(object):
 		return self
 
 	def  __exit__(self, exc_type, exc_value, traceback):
+	"""close ExifTool object"""
 		self.process.stdin.write("-stay_open\nFalse\n")
 		self.process.stdin.flush()
 
 	def execute(self, *args):
+	"""pass arbitrary commands to Exiftool"""
 		args = args + ("-execute\n",)
 		self.process.stdin.write(str.join("\n", args))
 		self.process.stdin.flush()
@@ -32,6 +37,7 @@ class ExifTool(object):
 		return output[:-len(self.sentinel)]
 
 	def extract_embedded_jpg(self, filename):
+	"""function to extract embedded jpg from Canon cr2 files."""
 		basename, ext = os.path.splitext(filename)
 		if not os.path.isfile(f"{basename}.cr2"):
 			print(f"ignoring '{basename}'")
@@ -44,6 +50,7 @@ class ExifTool(object):
 			print(f"extracted {basename}.jpg")
 
 	def import_raw(self, filename, output_dir):
+	"""function to import directories and files"""
 		basename, ext = os.path.splitext(filename)
 		self.execute(
 			"-d", f"{output_dir}/%Y/%V/%Y-%m-%d_%H-%M-%S",
