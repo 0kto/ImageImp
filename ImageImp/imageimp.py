@@ -39,7 +39,7 @@ def main():
 
 def usage():
 """print usage and implemented options"""
-	print("iimg options <filelist>")
+	print("imageimp options <filelist>")
 	print("")
 	print("available options")
 	print("-e, --extract     extract embedded .jpg from .cr2")
