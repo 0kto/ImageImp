@@ -13,7 +13,7 @@ import threading
 from class_ExifTool import ExifTool
 
 def main():
-"""handles setting of options, and dispatching of tasks for parallel processing."""
+	"""handles setting of options, and dispatching of tasks for parallel processing."""
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "eho:",["extract","help","import","outputdir"]) 
 	except getopt.GetoptError as err:
@@ -40,7 +40,7 @@ def main():
 
 
 def usage():
-"""print usage and implemented options"""
+	"""print usage and implemented options"""
 	print("imageimp options <filelist>")
 	print("")
 	print("available options (always specify short-options first!)")
@@ -50,7 +50,7 @@ def usage():
 
 
 def parallel_processing(function, items, num_splits=config['general'].getint('processes')):
-"""wrapping to execute an arbitrary functions acting on a list of items in parallel"""
+	"""wrapping to execute an arbitrary functions acting on a list of items in parallel"""
 	split_size = len(items) // num_splits
 	threads = []
 	for i in range(num_splits):
@@ -63,7 +63,7 @@ def parallel_processing(function, items, num_splits=config['general'].getint('pr
 		t.join()
 			
 def process(function, items, start, end):
-"""target process loop for the prarallel_processing function"""
+	"""target process loop for the prarallel_processing function"""
 	for item in items[start:end]:
 		try:
 			function(item)
