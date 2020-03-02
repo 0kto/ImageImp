@@ -2,7 +2,6 @@
 import os
 import sys
 import getopt
-import glob
 
 import configparser
 config = configparser.ConfigParser()
@@ -13,9 +12,9 @@ import threading
 from class_ExifTool import ExifTool
 
 def main():
-"""handles setting of options, and dispatching of tasks for parallel processing."""
+	"""handles setting of options, and dispatching of tasks for parallel processing."""
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "eho:",["extract","help","import"]) 
+		opts, args = getopt.getopt(sys.argv[1:], "eho:",["extract","help","import","outputdir"]) 
 	except getopt.GetoptError as err:
 		print(err)
 		sys.exit(2)
@@ -29,6 +28,8 @@ def main():
 		elif o in ("-o"):
 			outputdir = a
 		elif o in ("--import"):
+			if not 'outputdir' in locals():
+				outputdir = "."
 			with ExifTool() as e:
 				parallel_processing(lambda file: e.import_raw(file, outputdir), args)
 		else:
@@ -38,15 +39,17 @@ def main():
 
 
 def usage():
-"""print usage and implemented options"""
-	print("iimg options <filelist>")
+	"""print usage and implemented options"""
+	print("imageimp options <filelist>")
 	print("")
-	print("available options")
+	print("available options (always specify short-options first!)")
 	print("-e, --extract     extract embedded .jpg from .cr2")
+	print("-o, --outputdir   specify output directory")
+	print("    --import      import .cr2 files")
 
 
 def parallel_processing(function, items, num_splits=config['general'].getint('processes')):
-"""wrapping to execute an arbitrary functions acting on a list of items in parallel"""
+	"""wrapping to execute an arbitrary functions acting on a list of items in parallel"""
 	split_size = len(items) // num_splits
 	threads = []
 	for i in range(num_splits):
@@ -59,7 +62,7 @@ def parallel_processing(function, items, num_splits=config['general'].getint('pr
 		t.join()
 			
 def process(function, items, start, end):
-"""target process loop for the prarallel_processing function"""
+	"""target process loop for the prarallel_processing function"""
 	for item in items[start:end]:
 		try:
 			function(item)
