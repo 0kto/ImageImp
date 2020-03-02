@@ -31,6 +31,10 @@ def main():
 		elif o in ("--import"):
 			with ExifTool() as e:
 				parallel_processing(lambda file: e.import_raw(file, outputdir), args)
+		else:
+			usage()
+			sys.exit()
+
 
 
 def usage():
