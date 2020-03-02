@@ -7,6 +7,8 @@ import configparser
 config = configparser.ConfigParser()
 config.read('config.ini')
 import threading
+import glob
+import json
 
 # import definitions and classes
 from class_ExifTool import ExifTool
@@ -18,20 +20,30 @@ def main():
 	except getopt.GetoptError as err:
 		print(err)
 		sys.exit(2)
+	filelist = []
+	for arg in args:
+		if os.path.isdir(arg):
+			for ext_raw in json.loads(config.get('ExifTool','rawformats')):
+				files_found = glob.glob(f"{arg}/**/*{ext_raw}",recursive=True)
+				if len(files_found) >= 1:
+					filelist += files_found
+		elif os.path.isfile(arg):
+			filelist += arg
+
 	for o, a in opts:
 		if o in ("-h", "--help"):
 			usage()
 			sys.exit()
 		elif o in ("-e", "--extract"):
 			with ExifTool() as e:
-				parallel_processing(e.extract_embedded_jpg, args)
+				parallel_processing(e.extract_embedded_jpg, filelist)
 		elif o in ("-o"):
 			outputdir = a
 		elif o in ("--import"):
 			if not 'outputdir' in locals():
 				outputdir = "."
 			with ExifTool() as e:
-				parallel_processing(lambda file: e.import_raw(file, outputdir), args)
+				parallel_processing(lambda file: e.import_raw(file, outputdir), filelist)
 		else:
 			usage()
 			sys.exit()
