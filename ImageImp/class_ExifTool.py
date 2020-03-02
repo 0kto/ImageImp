@@ -2,6 +2,9 @@ import subprocess
 import json
 import os
 
+import configparser
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 # from https://stackoverflow.com/questions/10075115/call-exiftool-from-a-python-script
 class ExifTool(object):
@@ -39,15 +42,15 @@ class ExifTool(object):
 	def extract_embedded_jpg(self, filename):
 		"""function to extract embedded jpg from Canon cr2 files."""
 		basename, ext = os.path.splitext(filename)
-		if not os.path.isfile(f"{basename}.cr2"):
-			print(f"ignoring '{basename}'")
+		if not ext in json.loads(config.get('ExifTool','rawformats')):
+			print(f"'{filename}' ignored: not a raw format")
 
 		elif os.path.isfile(f"{basename}.jpg"):
-			print(f"pre-existing '{basename}'.jpg")
+			print(f"'{filename}' ignored: pre-existing '.jpg'")
 
 		else:
 			self.execute("-b", "-PreviewImage", "-w", ".jpg", f"{basename}.cr2")
-			print(f"extracted {basename}.jpg")
+			print(f"'{filename}': embedded '.jpg' extracted")
 
 	def import_raw(self, filename, output_dir):
 		"""function to import directories and files"""
