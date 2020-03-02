@@ -1,6 +1,7 @@
 import subprocess
 import json
 import os
+import glob
 
 import configparser
 config = configparser.ConfigParser()
@@ -55,7 +56,13 @@ class ExifTool(object):
 	def import_raw(self, filename, output_dir):
 		"""function to import directories and files"""
 		basename, ext = os.path.splitext(filename)
-		self.execute(
-			"-d", f"{output_dir}/%Y/%V/%Y-%m-%d_%H-%M-%S",
-			"-FileName<${CreateDate}_${MyModel}_${FileIndex}.%le",
-			f"{filename}")
+		if ext in json.loads(config.get('ExifTool','rawformats')):
+			sidecarfiles = glob.glob(f"{basename}.???")
+			sidecarfiles.remove(filename)
+
+			for sidecar in sidecarfiles + [filename]:
+				self.execute(
+					"-tagsfromfile", f"{filename}",
+					"-d", f"{output_dir}/%Y/%V/%Y-%m-%d_%H-%M-%S",
+					"-FileName<${CreateDate}_${MyModel}_${FileIndex}.%le",
+					f"{sidecar}")
