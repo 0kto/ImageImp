@@ -15,7 +15,7 @@ from class_ExifTool import ExifTool
 def main():
 """handles setting of options, and dispatching of tasks for parallel processing."""
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "eho:",["extract","help","import"]) 
+		opts, args = getopt.getopt(sys.argv[1:], "eho:",["extract","help","import","outputdir"]) 
 	except getopt.GetoptError as err:
 		print(err)
 		sys.exit(2)
@@ -29,6 +29,8 @@ def main():
 		elif o in ("-o"):
 			outputdir = a
 		elif o in ("--import"):
+			if not 'outputdir' in locals():
+				outputdir = "."
 			with ExifTool() as e:
 				parallel_processing(lambda file: e.import_raw(file, outputdir), args)
 		else:
@@ -41,8 +43,10 @@ def usage():
 """print usage and implemented options"""
 	print("imageimp options <filelist>")
 	print("")
-	print("available options")
+	print("available options (always specify short-options first!)")
 	print("-e, --extract     extract embedded .jpg from .cr2")
+	print("-o, --outputdir   specify output directory")
+	print("    --import      import .cr2 files")
 
 
 def parallel_processing(function, items, num_splits=config['general'].getint('processes')):
