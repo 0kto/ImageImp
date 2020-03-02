@@ -35,15 +35,14 @@ def main():
 			usage()
 			sys.exit()
 		elif o in ("-e", "--extract"):
-			with ExifTool() as e:
-				parallel_processing(e.extract_embedded_jpg, filelist)
+			parallel_processing(ExifTool.extract_embedded_jpg, ExifToolProcess, filelist)
 		elif o in ("-o"):
 			outputdir = a
 		elif o in ("--import"):
 			if not 'outputdir' in locals():
 				outputdir = "."
 			with ExifTool() as e:
-				parallel_processing(lambda file: e.import_raw(file, outputdir), filelist)
+				parallel_processing(lambda file: e.import_raw(file, outputdir), Process, filelist)
 		else:
 			usage()
 			sys.exit()
@@ -60,7 +59,7 @@ def usage():
 	print("    --import      import .cr2 files")
 
 
-def parallel_processing(function, items, num_splits=config['general'].getint('processes')):
+def parallel_processing(function, target, items, num_splits=config['general'].getint('processes')):
 	"""wrapping to execute an arbitrary functions acting on a list of items in parallel"""
 	split_size = len(items) // num_splits
 	threads = []
@@ -68,18 +67,27 @@ def parallel_processing(function, items, num_splits=config['general'].getint('pr
 		start = i * split_size
 		end = None if i+1 == num_splits else (i+1) * split_size                 
 		threads.append(
-			threading.Thread(target=process, args=(function, items, start, end)))
+			threading.Thread(target=target, args=(function, items, start, end)))
 		threads[-1].start()
 	for t in threads:
 		t.join()
 			
-def process(function, items, start, end):
-	"""target process loop for the prarallel_processing function"""
+def Process(function, items, start, end):
+	"""target process loop for arbitrary function"""
 	for item in items[start:end]:
 		try:
 			function(item)
 		except Exception:
 			print('error with item')
+
+def ExifToolProcess(function, items, start, end):
+	"""target process loop spawning ExifTool object"""
+	with ExifTool() as e:
+		for item in items[start:end]:
+			try:
+				function(e,item)
+			except Exception:
+				print('error with item')
 			
 if __name__ == "__main__":
 	main()
