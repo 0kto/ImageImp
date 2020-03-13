@@ -50,7 +50,7 @@ class ExifTool(object):
 			print(f"'{filename}' ignored: pre-existing '.jpg'")
 
 		else:
-			self.execute("-b", "-PreviewImage", "-w", ".jpg", f"-filename={basename}.jpg", filename)
+			self.execute("-PreviewImage", "-b", "-w", "%d%f.jpg", filename)
 			print(f"'{filename}': embedded '.jpg' extracted")
 
 	def import_raw(self, filename, output_dir):
