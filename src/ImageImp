@@ -59,7 +59,7 @@ def usage():
 	print("    --import      import .cr2 files")
 
 
-def parallel_processing(function, target, items, num_splits=config['general'].getint('processes')):
+def parallel_processing(function, target, items, num_splits=config['General'].getint('processes')):
 	"""wrapping to execute an arbitrary functions acting on a list of items in parallel"""
 	split_size = len(items) // num_splits
 	threads = []
