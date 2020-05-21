@@ -1,11 +1,14 @@
-import subprocess
-import json
+#!/usr/bin/python3
+
 import os
-import glob
+import subprocess
 
 import configparser
 config = configparser.ConfigParser()
 config.read('config.ini')
+
+import glob
+import json
 
 # from https://stackoverflow.com/questions/10075115/call-exiftool-from-a-python-script
 class ExifTool(object):
