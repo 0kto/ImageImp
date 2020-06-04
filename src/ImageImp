@@ -6,10 +6,11 @@ import sys
 import getopt
 
 import configparser
-config = configparser.ConfigParser()
-config.read('config.ini')
 import glob
 import json
+
+config = configparser.ConfigParser()
+config.read(os.path.expanduser('~/.config/ImageImp/config.ini'))
 
 # import definitions and classes
 from class_ExifTool import ExifTool
@@ -60,7 +61,7 @@ def usage():
 	print("    --import      import .cr2 files")
 
 
-def parallel_processing(function, target, items, num_splits=config['General'].getint('processes')):
+def parallel_processing(function, target, items, num_splits=config.getint('General','processes', fallback=8)):
 	"""wrapping to execute an arbitrary functions acting on a list of items in parallel"""
 	split_size = len(items) // num_splits
 	threads = []

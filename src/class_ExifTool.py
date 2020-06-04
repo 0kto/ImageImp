@@ -5,7 +5,7 @@ import subprocess
 
 import configparser
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(os.path.expanduser('~/.config/ImageImp/config.ini'))
 
 import glob
 import json
